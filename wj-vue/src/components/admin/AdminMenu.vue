@@ -1,20 +1,26 @@
 <template>
-  <div>
     <el-menu
-      :default-active="'/admin/users'"
+      :default-active="currentPath"
       class="el-menu-admin"
       router
+      @select="handleSelect"
       mode="vertical"
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
       <div style="height: 80px;"></div>
-      <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name" style="font-size: 18px">
-        <i :class="item.icon"></i>
-        {{ item.navItem }}
-      </el-menu-item>
+        <!--index 没有用但是必需字段-->
+        <el-submenu  v-for="(item,i) in adminMenus" :key="i" :index="(i).toString()" style="text-align: left">
+          <span slot="title" style="font-size: 17px;">
+            <i :class="item.iconCls"></i>
+            {{item.nameZh}}
+          </span>
+          <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
+            <i :class="child.icon"></i>
+            {{ child.nameZh }}
+          </el-menu-item>
+        </el-submenu>
     </el-menu>
-  </div>
 </template>
 
 <script>
@@ -22,13 +28,20 @@
       name: 'AdminMenu',
       data () {
         return {
-          navList: [
-            {name: '/admin/users', navItem: '用户管理', icon: 'el-icon-user'},
-            {name: '/admin/library', navItem: '图书管理', icon: 'el-icon-tickets'},
-            {name: '/admin/news', navItem: '新闻管理', icon: 'el-icon-news'},
-            {name: '/system', navItem: '系统设置', icon: 'el-icon-s-tools'}
-          ],
-          keywords: ''
+          // currentPath: this.$route.path
+        }
+      },
+      computed: {
+        adminMenus () {
+          return this.$store.state.adminMenus
+        },
+        currentPath () {
+          return this.$route.path
+        }
+      },
+      methods: {
+        handleSelect (key, keyPath) {
+          console.log(this)
         }
       }
     }
@@ -36,8 +49,7 @@
 
 <style scoped>
   .el-menu-admin {
-    height: 1200px;
-    font-size: 30px;
+    height: 1000px;
     border-radius: 5px;
   }
 </style>

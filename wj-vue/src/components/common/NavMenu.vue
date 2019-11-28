@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-menu
-      :default-active="'/index'"
+      :default-active="currentPath"
       router
       mode="horizontal"
       @select="handleSelect"
@@ -12,7 +12,7 @@
       <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
         {{ item.navItem }}
       </el-menu-item>
-      <i class="el-icon-switch-button" v-on:click="logout" style="float:right;font-size: 40px;color: #222;padding: 10px"></i>
+      <!--<i class="el-icon-switch-button" v-on:click="logout" style="float:right;font-size: 40px;color: #222;padding: 10px"></i>-->
       <span style="position: absolute;padding-top: 20px;right: 43%;font-size: 20px;font-weight: bold">White Jotter - Your Mind Palace</span>
       <el-input
         placeholder="快速搜索..."
@@ -30,6 +30,7 @@
     name: 'NavMenu',
     data () {
       return {
+        // currentPath: this.$route.path,
         navList: [
           {name: '/index', navItem: '首页'},
           {name: '/jotter', navItem: '笔记本'},
@@ -42,23 +43,27 @@
     computed: {
       hoverBackground () {
         return '#ffd04b'
+      },
+      currentPath () {
+        return this.$route.path
       }
     },
     methods: {
       handleSelect (key, keyPath) {
-        console.log(key, keyPath)
-      },
-
-      logout () {
-        var _this = this
-        this.$axios.get('/logout').then(resp => {
-          if (resp.data.code === 200) {
-            // 登出操作前后端应保持一致
-            _this.$store.commit('logout')
-            _this.$router.replace('/login')
-          }
-        }).catch(failResponse => {})
+        console.log(key)
+        console.log('...')
+        console.log(keyPath)
       }
+      // logout () {
+      //   var _this = this
+      //   this.$axios.get('/logout').then(resp => {
+      //     if (resp.data.code === 200) {
+      //       // 前后端状态保持一致
+      //       _this.$store.commit('logout')
+      //       _this.$router.replace('/login')
+      //     }
+      //   }).catch(failResponse => {})
+      // }
     }
   }
 </script>

@@ -8,6 +8,9 @@ import Login from '../components/Login'
 import Home from '../components/Home'
 import AdminIndex from '../components/admin/AdminIndex'
 import Register from '../components/Register'
+// import UserProfile from '../components/admin/user/UserProfile'
+// import UserRole from '../components/admin/user/UserRole'
+// import UserBasic from '../components/admin/user/UserBasic'
 
 Vue.use(Router)
 
@@ -16,12 +19,9 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'index',
-      redirect: '/index',
-      component: AppIndex,
-      meta: {
-        requireAuth: true
-      }
+      name: 'Default',
+      redirect: '/home',
+      component: Home
     },
     {
       // home页面并不需要被访问，只是作为其它组件的父组件
@@ -33,18 +33,12 @@ export default new Router({
         {
           path: '/index',
           name: 'AppIndex',
-          component: AppIndex,
-          meta: {
-            requireAuth: true
-          }
+          component: AppIndex
         },
         {
           path: '/jotter',
           name: 'Jotter',
-          component: JotterIndex,
-          meta: {
-            requireAuth: true
-          }
+          component: JotterIndex
         },
         {
           path: '/editor',
@@ -57,10 +51,7 @@ export default new Router({
         {
           path: '/library',
           name: 'Library',
-          component: LibraryIndex,
-          meta: {
-            requireAuth: true
-          }
+          component: LibraryIndex
         }
       ]
     },
@@ -81,6 +72,18 @@ export default new Router({
       meta: {
         requireAuth: true
       }
+      // children: [
+        // {
+        //   path: '/admin/profile',
+        //   name: 'basic',
+        //   component: UserProfile
+        // },
+        // {
+        //   path: '/admin/role',
+        //   name: 'basic',
+        //   component: UserRole
+        // }
+      // ]
     }
   ]
 })
