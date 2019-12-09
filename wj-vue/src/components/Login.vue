@@ -1,6 +1,6 @@
 <template>
   <body id="paper">
-    <el-form :rules="rules" class="login-container" label-position="left"
+    <el-form :model="loginForm" :rules="rules" class="login-container" label-position="left"
              label-width="0px" v-loading="loading">
       <h3 class="login_title">系统登录</h3>
       <el-form-item prop="username">
@@ -49,7 +49,7 @@
               var data = resp.data.data
               _this.$store.commit('login', data)
               var path = _this.$route.query.redirect
-              _this.$router.replace({path: path === '/' || path === undefined ? '/admin' : path})
+              _this.$router.replace({path: path === '/' || path === undefined ? '/admin/dashboard' : path})
             }
           })
           .catch(failResponse => {})

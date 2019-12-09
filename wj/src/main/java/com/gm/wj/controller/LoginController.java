@@ -32,12 +32,18 @@ public class LoginController {
         try {
             subject.login(usernamePasswordToken);
             // 生成随机 token 并存储在 session 中
-            User user = userService.getByUserName(username);
+            User user = userService.findByUserName(username);
             return ResultFactory.buildSuccessResult(usernamePasswordToken);
         } catch (AuthenticationException e) {
             String message = "账号密码错误";
             return ResultFactory.buildFailResult(message);
         }
+    }
+
+    @GetMapping("/login")
+    public Result login() {
+        String message = "非法登录";
+        return ResultFactory.buildSuccessResult(message);
     }
 
     @PostMapping("api/register")
@@ -61,7 +67,7 @@ public class LoginController {
 
         user.setSalt(salt);
         user.setPassword(encodedPassword);
-        userService.add(user);
+        userService.addOrUpdate(user);
 
         return ResultFactory.buildSuccessResult(user);
     }
