@@ -19,6 +19,11 @@
         <el-form-item label="密码" label-width="120px" prop="password">
           <el-button type="warning" @click="resetPassword(selectedUser.username)">重置密码</el-button>
         </el-form-item>
+        <el-form-item label="角色分配" label-width="120px" prop="roles">
+          <el-checkbox-group v-model="selectedRolesIds">
+              <el-checkbox v-for="(role,i) in roles" :key="i" :label="role.id">{{role.nameZh}}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -32,10 +37,12 @@
         <el-breadcrumb-item>用户信息</el-breadcrumb-item>
       </el-breadcrumb>
     </el-row>
+    <bulk-registration @onSubmit="listUsers()"></bulk-registration>
     <el-card style="margin: 18px 2%;width: 95%">
       <el-table
         :data="users"
         stripe
+        :default-sort = "{prop: 'id', order: 'ascending'}"
         style="width: 100%"
         :max-height="tableHeight">
         <el-table-column
@@ -45,6 +52,7 @@
         <el-table-column
           prop="id"
           label="id"
+          sortable
           width="100">
         </el-table-column>
         <el-table-column
@@ -70,6 +78,7 @@
         </el-table-column>
         <el-table-column
           label="状态"
+          sortable
           width="100">
           <template slot-scope="scope">
             <el-switch
@@ -91,7 +100,6 @@
               编辑
             </el-button>
             <el-button
-              @click.native.prevent="deleteBook(scope.row.id)"
               type="text"
               size="small">
               移除
@@ -108,17 +116,22 @@
 </template>
 
 <script>
+  import BulkRegistration from './BulkRegistration'
     export default {
-        name: 'UserProfile',
+      name: 'UserProfile',
+      components: {BulkRegistration},
       data () {
           return {
             users: [],
+            roles: [],
             dialogFormVisible: false,
-            selectedUser: []
+            selectedUser: [],
+            selectedRolesIds: []
           }
       },
       mounted () {
         this.listUsers()
+        this.listRoles()
       },
       computed: {
         tableHeight () {
@@ -129,18 +142,26 @@
         listUsers () {
           var _this = this
           this.$axios.get('/admin/user').then(resp => {
-            if (resp && resp.status === 200) {
-              _this.users = resp.data
+            if (resp && resp.data.code === 200) {
+              _this.users = resp.data.result
+            }
+          })
+        },
+        listRoles () {
+          var _this = this
+          this.$axios.get('/admin/role').then(resp => {
+            if (resp && resp.data.code === 200) {
+              _this.roles = resp.data.result
             }
           })
         },
         commitStatusChange (value, user) {
           if (user.username !== 'admin') {
-            this.$axios.put('/admin/user-status', {
+            this.$axios.put('/admin/user/status', {
               enabled: value,
               username: user.username
             }).then(resp => {
-              if (resp && resp.status === 200) {
+              if (resp && resp.data.code === 200) {
                 if (value) {
                   this.$message('用户 [' + user.username + '] 已启用')
                 } else {
@@ -154,27 +175,47 @@
           }
         },
         onSubmit (user) {
+          let _this = this
+          // 根据视图绑定的角色 id 向后端传送角色信息
+          let roles = []
+          for (let i = 0; i < _this.selectedRolesIds.length; i++) {
+            for (let j = 0; j < _this.roles.length; j++) {
+              if (_this.selectedRolesIds[i] === _this.roles[j].id) {
+                roles.push(_this.roles[j])
+              }
+            }
+          }
           this.$axios.put('/admin/user', {
             username: user.username,
             name: user.name,
             phone: user.phone,
-            email: user.email
+            email: user.email,
+            roles: roles
           }).then(resp => {
-            if (resp && resp.status === 200) {
+            if (resp && resp.data.code === 200) {
               this.$alert('用户信息修改成功')
               this.dialogFormVisible = false
+              // 修改角色后重新请求用户信息，实现视图更新
+              this.listUsers()
+            } else {
+              this.$alert(resp.data.message)
             }
           })
         },
         editUser (user) {
           this.dialogFormVisible = true
           this.selectedUser = user
+          let roleIds = []
+          for (let i = 0; i < user.roles.length; i++) {
+            roleIds.push(user.roles[i].id)
+          }
+          this.selectedRolesIds = roleIds
         },
         resetPassword (username) {
-          this.$axios.put('/password', {
+          this.$axios.put('/admin/user/password', {
             username: username
           }).then(resp => {
-            if (resp && resp.status === 200) {
+            if (resp && resp.data.code === 200) {
               this.$alert('密码已重置为 123')
           }
           })

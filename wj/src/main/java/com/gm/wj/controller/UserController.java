@@ -1,97 +1,48 @@
 package com.gm.wj.controller;
 
-import com.gm.wj.pojo.AdminRole;
-import com.gm.wj.pojo.User;
+import com.gm.wj.entity.*;
 import com.gm.wj.result.Result;
 import com.gm.wj.result.ResultFactory;
-import com.gm.wj.service.AdminRoleService;
-import com.gm.wj.service.UserService;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.apache.shiro.crypto.hash.SimpleHash;
+import com.gm.wj.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.relation.Role;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.validation.Valid;
+
+/**
+ * User controller.
+ *
+ * @author Evan
+ * @date 2019/11
+ */
 
 @RestController
 public class UserController {
     @Autowired
     UserService userService;
     @Autowired
-    AdminRoleService adminRoleService;
+    AdminUserRoleService adminUserRoleService;
 
-    //    @RequiresPermissions("/api/admin/user")
     @GetMapping("/api/admin/user")
-    public List<User> listUsers() throws Exception {
-        return userService.list();
+    public Result listUsers() {
+        return ResultFactory.buildSuccessResult(userService.list());
     }
 
-    @GetMapping("/api/admin/user-role")
-    public Map listUsersAndRoles() throws Exception {
-        Map<String, List<AdminRole>>  usersWithRoles = new HashMap<>();
-        List<User> users = userService.list();
-        List<AdminRole> roles = new ArrayList<>();
-        for (User user : users) {
-            roles = adminRoleService.listRolesByUser(user.getUsername());
-            usersWithRoles.put(user.getUsername(), roles);
-        }
-        return usersWithRoles;
+    @PutMapping("/api/admin/user/status")
+    public Result updateUserStatus(@RequestBody @Valid User requestUser) {
+        userService.updateUserStatus(requestUser);
+        return ResultFactory.buildSuccessResult("用户状态更新成功");
     }
 
-    @PutMapping("/api/admin/user-status")
-    public Result updateUserStatus(@RequestBody User requestUser) {
-        User user = userService.findByUserName(requestUser.getUsername());
-        user.setEnabled(requestUser.isEnabled());
-        userService.addOrUpdate(user);
-        String message = "用户" + requestUser.getUsername() + "状态更新成功";
-        return ResultFactory.buildSuccessResult(message);
+    @PutMapping("/api/admin/user/password")
+    public Result resetPassword(@RequestBody @Valid User requestUser) {
+        userService.resetPassword(requestUser);
+        return ResultFactory.buildSuccessResult("重置密码成功");
     }
 
-    @PutMapping("api/password")
-    public Result resetPassword(@RequestBody User requestUser) {
-        User user = userService.findByUserName(requestUser.getUsername());
-        String salt = new SecureRandomNumberGenerator().nextBytes().toString();
-        int times = 2;
-        user.setSalt(salt);
-        if (requestUser.getPassword() == null) {
-            String encodedPassword = new SimpleHash("md5", "123", salt, times).toString();
-            user.setPassword(encodedPassword);
-        } else {
-            String encodedPassword = new SimpleHash("md5", requestUser.getPassword(), salt, times).toString();
-            user.setPassword(encodedPassword);
-        }
-        userService.addOrUpdate(user);
-        String message = "修改密码成功";
-        return ResultFactory.buildSuccessResult(message);
-    }
-
-    @PutMapping("api/admin/user")
-    public Result editUser(@RequestBody User requestUser) {
-        User user = userService.findByUserName(requestUser.getUsername());
-        user.setName(requestUser.getName());
-        user.setPhone(requestUser.getPhone());
-        user.setEmail(requestUser.getEmail());
-        userService.addOrUpdate(user);
-        String message = "修改用户信息成功";
-        return ResultFactory.buildSuccessResult(message);
-    }
-
-    @GetMapping("/api/admin/role")
-    public List<AdminRole> listRoles() throws Exception {
-        return adminRoleService.list();
-    }
-
-    @PutMapping("/api/admin/role")
-    public Result updateRoleStatus(@RequestBody AdminRole requestRole) {
-        AdminRole adminRole = adminRoleService.findById(requestRole.getId());
-        adminRole.setEnabled(requestRole.isEnabled());
-        adminRoleService.addOrUpdate(adminRole);
-        String message = "用户" + adminRole.getNameZh() + "状态更新成功";
-        return ResultFactory.buildSuccessResult(message);
+    @PutMapping("/api/admin/user")
+    public Result editUser(@RequestBody @Valid User requestUser) {
+        userService.editUser(requestUser);
+        return ResultFactory.buildSuccessResult("修改用户信息成功");
     }
 }

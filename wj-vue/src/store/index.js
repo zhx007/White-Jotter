@@ -5,12 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    user: {
-      name: window.localStorage.getItem('user' || '[]') == null ? '未登录' : JSON.parse(window.localStorage.getItem('user' || '[]')).name,
-      // userface: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).userface,
-      username: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).username
-      // roles: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).roles
-    },
+    username: window.localStorage.getItem('username') == null ? '' : JSON.parse(window.localStorage.getItem('username' || '[]')),
     adminMenus: []
   },
   mutations: {
@@ -18,13 +13,13 @@ export default new Vuex.Store({
       state.adminMenus = menus
     },
     login (state, data) {
-      state.user = data
-      window.localStorage.setItem('user', JSON.stringify(data))
+      state.username = data
+      window.localStorage.setItem('username', JSON.stringify(data))
     },
     logout (state) {
       // 注意不能用 null 清除，否则将无法判断 user 里具体的内容
-      state.user = []
-      window.localStorage.removeItem('user')
+      state.username = ''
+      window.localStorage.removeItem('username')
       state.adminMenus = []
     }
   },

@@ -1,6 +1,6 @@
 package com.gm.wj.realm;
 
-import com.gm.wj.pojo.User;
+import com.gm.wj.entity.User;
 import com.gm.wj.service.AdminPermissionService;
 import com.gm.wj.service.AdminRoleService;
 import com.gm.wj.service.UserService;
@@ -15,6 +15,10 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Set;
 
+/**
+ * @author Evan
+ * @date 2019/10
+ */
 public class WJRealm extends AuthorizingRealm {
 
     @Autowired
@@ -41,7 +45,7 @@ public class WJRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         String userName = token.getPrincipal().toString();
-        User user = userService.findByUserName(userName);
+        User user = userService.findByUsername(userName);
         if (ObjectUtils.isEmpty(user)) {
             throw new UnknownAccountException();
         }

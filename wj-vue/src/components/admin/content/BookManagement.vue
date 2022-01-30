@@ -112,8 +112,8 @@
           type: 'warning'
         }).then(() => {
             this.$axios
-              .post('/delete', {id: id}).then(resp => {
-              if (resp && resp.status === 200) {
+              .post('/admin/content/books/delete', {id: id}).then(resp => {
+              if (resp && resp.data.code === 200) {
                 this.loadBooks()
               }
             })
@@ -124,7 +124,6 @@
             message: '已取消删除'
           })
         })
-        // alert(id)
       },
       editBook (item) {
         this.$refs.edit.dialogFormVisible = true
@@ -148,8 +147,8 @@
       loadBooks () {
         var _this = this
         this.$axios.get('/books').then(resp => {
-          if (resp && resp.status === 200) {
-            _this.books = resp.data
+          if (resp && resp.data.code === 200) {
+            _this.books = resp.data.result
           }
         })
       }
